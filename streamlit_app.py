@@ -1,338 +1,581 @@
 import streamlit as st
 import os
 import pandas as pd
-from datetime import date
+import plotly.graph_objects as go
+from datetime import date, timedelta
+import random
 
-# ---------------------------------------------------
-# CONFIGURACIÓN GENERAL
-# ---------------------------------------------------
+# ─────────────────────────────────────────
+# CONFIGURACIÓN
+# ─────────────────────────────────────────
 st.set_page_config(
     page_title="Gestión Biomédica SPORTMEDS",
     page_icon="⚕️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ---------------------------------------------------
-# ESTILOS PERSONALIZADOS
-# ---------------------------------------------------
+# ─────────────────────────────────────────
+# ESTILOS
+# ─────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-* { font-family: 'Inter', sans-serif; }
+:root {
+    --navy:   #0D2B52;
+    --blue:   #1a8fd1;
+    --blue2:  #2eaff5;
+    --light:  #F0F4F9;
+    --gray:   #8a9bb5;
+    --green:  #27ae60;
+    --orange: #e67e22;
+    --red:    #e74c3c;
+    --shadow: 0 2px 12px rgba(13,43,82,0.09);
+}
+* { font-family: 'DM Sans', sans-serif !important; }
 
-.main {
-    background-color: #F5F7FA;
+/* Fondo */
+.main .block-container {
+    background-color: var(--light);
+    padding-top: 1.2rem !important;
+    max-width: 100% !important;
 }
 
+/* Sidebar */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0D2B52 0%, #1a4a8a 100%);
+    background: linear-gradient(175deg, #0D2B52 0%, #0a1e3d 100%) !important;
 }
-
-section[data-testid="stSidebar"] * {
-    color: white !important;
+section[data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
+section[data-testid="stSidebar"] * { color: rgba(255,255,255,0.85) !important; }
+section[data-testid="stSidebar"] .stSelectbox > div > div {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    border-radius: 8px !important;
 }
-
-section[data-testid="stSidebar"] .stSelectbox label {
-    color: #a8c6f0 !important;
-    font-size: 0.85rem;
+section[data-testid="stSidebar"] label {
+    font-size: 0.7rem !important;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.45) !important;
 }
-
 section[data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.1) !important;
+    margin: 0.5rem 0 !important;
 }
 
-h1, h2, h3 {
-    color: #0D2B52;
-}
-
-.metric-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(13,43,82,0.08);
-    border-left: 4px solid #1a8fd1;
-}
-
-.stMetric {
-    background: white;
-    border-radius: 12px;
+.logo-wrap {
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     padding: 1rem;
-    box-shadow: 0 2px 8px rgba(13,43,82,0.08);
-}
-
-.stButton > button {
-    background: linear-gradient(135deg, #0D2B52, #1a8fd1);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1.5rem;
-    font-weight: 600;
-    transition: opacity 0.2s;
-}
-
-.stButton > button:hover {
-    opacity: 0.85;
-    color: white;
-}
-
-.sidebar-logo-container {
-    display: flex;
-    justify-content: center;
-    padding: 1rem 0 0.5rem 0;
-}
-
-.version-tag {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.45);
     text-align: center;
-    padding-bottom: 0.5rem;
 }
+
+/* Topbar */
+.topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: white; border-radius: 10px;
+    padding: 0.6rem 1.2rem; margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
+.topbar-title  { font-size: 1.05rem; font-weight: 700; color: var(--navy); }
+.topbar-crumb  { font-size: 0.72rem; color: var(--gray); margin-top: 1px; }
+.topbar-user   { font-size: 0.83rem; font-weight: 600; color: var(--navy); }
+
+/* KPI grid */
+.kpi-grid {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 14px; margin-bottom: 1rem;
+}
+.kpi-card {
+    background: white; border-radius: 12px;
+    padding: 1rem 1.1rem; box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 0.9rem;
+    border-top: 3px solid var(--blue); transition: transform .15s;
+}
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-icon {
+    font-size: 1.7rem; background: rgba(26,143,209,0.1);
+    border-radius: 10px; width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.kpi-val   { font-size: 1.55rem; font-weight: 700; color: var(--navy); line-height: 1; }
+.kpi-label { font-size: 0.75rem; color: var(--gray); margin-top: 3px; }
+.kpi-delta { font-size: 0.7rem; margin-top: 3px; }
+.up   { color: var(--green); }
+.down { color: var(--red); }
+
+/* Cards */
+.card {
+    background: white; border-radius: 12px;
+    padding: 1rem 1.1rem 0.6rem; box-shadow: var(--shadow);
+}
+.card-title {
+    font-size: 0.88rem; font-weight: 700; color: var(--navy);
+    border-bottom: 1px solid #eef2f7; padding-bottom: 0.4rem; margin-bottom: 0.5rem;
+}
+
+/* Botones */
+.stButton > button {
+    background: linear-gradient(135deg, var(--navy), var(--blue)) !important;
+    color: white !important; border: none !important;
+    border-radius: 8px !important; font-weight: 600 !important;
+}
+.stButton > button:hover { opacity: 0.85 !important; }
+
+/* Inputs */
+.stTextInput input, .stTextArea textarea {
+    border-radius: 8px !important; border: 1px solid #dce5f0 !important;
+}
+
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+header    { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------
-# SIDEBAR — LOGO + MENÚ
-# ---------------------------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-logo_path = os.path.join(BASE_DIR, "assets", "logo_sportmeds.png")
+# ─────────────────────────────────────────
+# RUTAS
+# ─────────────────────────────────────────
+BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
+LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo_sportmeds.png")
 
+# ─────────────────────────────────────────
+# SIDEBAR
+# ─────────────────────────────────────────
 with st.sidebar:
-    # Logo centrado en la parte superior
-    if os.path.exists(logo_path):
-        col_logo = st.columns([1, 3, 1])
-        with col_logo[1]:
-            st.image(logo_path, use_container_width=True)
+    st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
+    if os.path.exists(LOGO_PATH):
+        st.image(LOGO_PATH, use_container_width=True)
     else:
-        st.markdown(
-            "<div style='text-align:center; font-size:1.4rem; font-weight:700;"
-            " padding:1rem 0;'>⚕️ SPORTMEDS</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<span style='font-size:1.1rem;font-weight:700;color:white;'>⚕️ SPORTMEDS</span>",
+                    unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("### Menú Principal")
+    st.markdown("<br>", unsafe_allow_html=True)
 
     modulo = st.selectbox(
-        "Seleccione un módulo",
-        [
-            "🏠 Inicio",
-            "📦 Inventario",
-            "🔍 Tecnovigilancia",
-            "⚠️ Gestión de riesgos",
-            "🔧 Mantenimiento"
-        ]
+        "NAVEGACIÓN",
+        ["🏠  Panel de Control",
+         "📦  Inventario",
+         "🔍  Tecnovigilancia",
+         "⚠️  Gestión de Riesgos",
+         "🔧  Mantenimiento"],
+        label_visibility="visible"
     )
 
     st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='padding:0.3rem 0.8rem;'>
+        <div style='font-size:0.67rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.08em;'>Usuario</div>
+        <div style='font-size:0.87rem;font-weight:600;margin-top:3px;'>Ing. Biomédico</div>
+        <div style='font-size:0.7rem;color:rgba(255,255,255,0.4);'>Administrador</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown(
-        "<div class='version-tag'>Sistema de Gestión Biomédica v1.0<br>"
-        "© 2025 SPORTMEDS Centro Médico</div>",
+        "<div style='font-size:0.65rem;color:rgba(255,255,255,0.25);text-align:center;padding-bottom:.5rem;'>"
+        "Gestión Biomédica v1.0 · © 2025 SPORTMEDS</div>",
         unsafe_allow_html=True
     )
 
-# ---------------------------------------------------
-# ENCABEZADO PRINCIPAL
-# ---------------------------------------------------
-st.title("Gestión Biomédica SPORTMEDS")
-st.caption("Sistema integrado de gestión tecnológica biomédica")
-st.markdown("---")
+# ─────────────────────────────────────────
+# HELPER: topbar
+# ─────────────────────────────────────────
+def topbar(titulo, ruta):
+    st.markdown(f"""
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">{titulo}</div>
+            <div class="topbar-crumb">INICIO › {ruta}</div>
+        </div>
+        <div class="topbar-user">👤 Ing. Biomédico &nbsp;🔒</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ---------------------------------------------------
-# MÓDULO: INICIO
-# ---------------------------------------------------
-if "Inicio" in modulo:
-    st.header("📊 Dashboard principal")
+# ─────────────────────────────────────────
+# HELPER: plotly config
+# ─────────────────────────────────────────
+PLOT_CFG = {"displayModeBar": False}
 
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Equipos registrados", "245", "+3 este mes")
-    with col2:
-        st.metric("Riesgo alto", "18", "-2 vs mes anterior", delta_color="inverse")
-    with col3:
-        st.metric("Mantenimientos próximos", "12")
-    with col4:
-        st.metric("Eventos tecnovigilancia", "5", "+1 esta semana", delta_color="inverse")
+def base_layout(h=220):
+    return dict(height=h, margin=dict(l=0, r=0, t=4, b=0),
+                plot_bgcolor="white", paper_bgcolor="white")
 
-    st.markdown("---")
-    st.subheader("Resumen por servicio")
+# ══════════════════════════════════════════
+# PANEL DE CONTROL
+# ══════════════════════════════════════════
+if "Panel" in modulo:
+    topbar("Panel de Control", "Panel de Control")
 
-    data = {
-        "Servicio": ["UCI", "Urgencias", "Hospitalización", "Consulta externa"],
-        "Equipos": [68, 52, 89, 36],
-        "Mantenimientos pendientes": [3, 5, 2, 2],
-        "Riesgo alto": [7, 6, 3, 2],
-    }
-    st.dataframe(pd.DataFrame(data), use_container_width=True)
+    # KPIs
+    st.markdown("""
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">🩺</div>
+        <div>
+          <div class="kpi-val">245</div>
+          <div class="kpi-label">Equipos registrados</div>
+          <div class="kpi-delta up">▲ +3 este mes</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="border-top-color:#e74c3c;">
+        <div class="kpi-icon" style="background:rgba(231,76,60,.1);">⚠️</div>
+        <div>
+          <div class="kpi-val">18</div>
+          <div class="kpi-label">Equipos riesgo alto</div>
+          <div class="kpi-delta down">▼ -2 vs mes anterior</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="border-top-color:#e67e22;">
+        <div class="kpi-icon" style="background:rgba(230,126,34,.1);">🔧</div>
+        <div>
+          <div class="kpi-val">12</div>
+          <div class="kpi-label">Mantenimientos próximos</div>
+          <div class="kpi-delta" style="color:#e67e22;">● 3 urgentes</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="border-top-color:#27ae60;">
+        <div class="kpi-icon" style="background:rgba(39,174,96,.1);">📋</div>
+        <div>
+          <div class="kpi-val">5</div>
+          <div class="kpi-label">Eventos tecnovigilancia</div>
+          <div class="kpi-delta down">▲ +1 esta semana</div>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ---------------------------------------------------
-# MÓDULO: INVENTARIO
-# ---------------------------------------------------
+    # — Fila 1: 3 gráficas
+    c1, c2, c3 = st.columns([1.4, 1.1, 1.4])
+
+    with c1:
+        st.markdown('<div class="card"><div class="card-title">Mantenimientos por mes (2025)</div>', unsafe_allow_html=True)
+        meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul"]
+        fig = go.Figure()
+        fig.add_bar(name="Preventivo", x=meses, y=[8,10,7,12,9,14,11], marker_color="#1a8fd1")
+        fig.add_bar(name="Correctivo", x=meses, y=[3,5,2,4,6,3,5],    marker_color="#e74c3c")
+        lay = base_layout()
+        lay.update(barmode="group",
+                   legend=dict(orientation="h", y=1.05, x=1, xanchor="right", font_size=10),
+                   xaxis=dict(showgrid=False, tickfont_size=10),
+                   yaxis=dict(gridcolor="#f0f4f9", tickfont_size=10))
+        fig.update_layout(lay)
+        st.plotly_chart(fig, use_container_width=True, config=PLOT_CFG)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c2:
+        st.markdown('<div class="card"><div class="card-title">Equipos por clase INVIMA</div>', unsafe_allow_html=True)
+        fig2 = go.Figure(go.Pie(
+            labels=["Clase I","Clase IIa","Clase IIb","Clase III"],
+            values=[45,80,72,48], hole=0.52,
+            marker_colors=["#27ae60","#1a8fd1","#e67e22","#e74c3c"],
+            textfont_size=10
+        ))
+        fig2.update_layout(height=220, margin=dict(l=0,r=0,t=4,b=0),
+                           paper_bgcolor="white", showlegend=True,
+                           legend=dict(orientation="h", y=-0.28, font_size=9))
+        st.plotly_chart(fig2, use_container_width=True, config=PLOT_CFG)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c3:
+        st.markdown('<div class="card"><div class="card-title">Equipos por servicio</div>', unsafe_allow_html=True)
+        fig3 = go.Figure(go.Bar(
+            x=[68,52,89,36,20],
+            y=["UCI","Urgencias","Hospitalización","Consulta ext.","Imágenes"],
+            orientation="h",
+            marker_color=["#0D2B52","#1a8fd1","#2eaff5","#8bc4e8","#c5e1f5"],
+            text=[68,52,89,36,20], textposition="outside"
+        ))
+        lay3 = base_layout()
+        lay3.update(xaxis=dict(showgrid=False, visible=False),
+                    yaxis=dict(showgrid=False, tickfont_size=10))
+        fig3.update_layout(lay3)
+        st.plotly_chart(fig3, use_container_width=True, config=PLOT_CFG)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # — Fila 2: línea + tabla
+    c4, c5 = st.columns([1.6, 1])
+
+    with c4:
+        st.markdown('<div class="card"><div class="card-title">Eventos tecnovigilancia — últimos 30 días</div>', unsafe_allow_html=True)
+        dias    = [(date.today()-timedelta(days=i)).strftime("%d/%m") for i in range(29,-1,-1)]
+        eventos = [random.randint(0,3) for _ in dias]
+        fig4 = go.Figure(go.Scatter(
+            x=dias, y=eventos, mode="lines+markers",
+            line=dict(color="#1a8fd1", width=2),
+            marker=dict(color="#0D2B52", size=5),
+            fill="tozeroy", fillcolor="rgba(26,143,209,0.07)"
+        ))
+        lay4 = base_layout(210)
+        lay4.update(xaxis=dict(showgrid=False, tickangle=-45, tickfont_size=8,
+                               tickvals=dias[::5], ticktext=dias[::5]),
+                    yaxis=dict(gridcolor="#f0f4f9", tickfont_size=10))
+        fig4.update_layout(lay4)
+        st.plotly_chart(fig4, use_container_width=True, config=PLOT_CFG)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c5:
+        st.markdown('<div class="card"><div class="card-title">Próximos mantenimientos</div>', unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame({
+            "Equipo": ["Ventilador UCI-03","Monitor Urg-07","Desfibrilador","Bomba Inf-12","Rayos X Dig."],
+            "Fecha":  ["17/05","19/05","22/05","28/05","30/05"],
+            "Estado": ["🔴 Urgente","🔴 Urgente","🟡 Próximo","🟡 Próximo","🟢 Programado"],
+        }), use_container_width=True, hide_index=True, height=210)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ══════════════════════════════════════════
+# INVENTARIO
+# ══════════════════════════════════════════
 elif "Inventario" in modulo:
-    st.header("📦 Inventario biomédico")
-
-    with st.form("form_inventario", clear_on_submit=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            nombre = st.text_input("Nombre del equipo *")
-            marca = st.text_input("Marca *")
-            modelo = st.text_input("Modelo")
-            serie = st.text_input("Número de serie")
-        with col2:
-            servicio = st.selectbox(
-                "Servicio *",
-                ["UCI", "Urgencias", "Hospitalización", "Consulta externa"]
-            )
-            clasificacion = st.selectbox(
-                "Clasificación de riesgo (INVIMA)",
-                ["Clase I", "Clase IIa", "Clase IIb", "Clase III"]
-            )
-            fecha_adquisicion = st.date_input("Fecha de adquisición", value=date.today())
-            vida_util = st.number_input("Vida útil estimada (años)", min_value=1, max_value=30, value=5)
-
-        observaciones = st.text_area("Observaciones")
-        submitted = st.form_submit_button("✅ Registrar equipo")
-
-        if submitted:
-            if nombre and marca and servicio:
-                st.success(f"✅ **{nombre}** ({marca}) registrado correctamente en el servicio de **{servicio}**.")
-            else:
-                st.error("Por favor complete los campos obligatorios (*).")
-
-    st.markdown("---")
-    st.subheader("Equipos registrados")
-    demo_inventario = {
-        "Equipo": ["Ventilador Mecánico", "Monitor Multiparámetro", "Desfibrilador", "Bomba de Infusión"],
-        "Marca": ["Dräger", "Mindray", "Zoll", "Fresenius"],
-        "Servicio": ["UCI", "Urgencias", "UCI", "Hospitalización"],
-        "Riesgo": ["Clase III", "Clase IIb", "Clase III", "Clase IIa"],
-    }
-    st.dataframe(pd.DataFrame(demo_inventario), use_container_width=True)
-
-# ---------------------------------------------------
-# MÓDULO: TECNOVIGILANCIA
-# ---------------------------------------------------
-elif "Tecnovigilancia" in modulo:
-    st.header("🔍 Tecnovigilancia")
-    st.caption("Registro de eventos e incidentes adversos con dispositivos médicos")
-
-    with st.form("form_tecnovigilancia", clear_on_submit=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            equipo_tv = st.text_input("Equipo involucrado *")
-            fecha_evento = st.date_input("Fecha del evento", value=date.today())
-            tipo_evento = st.selectbox(
-                "Tipo de evento",
-                ["Incidente", "Casi incidente", "Evento adverso serio", "Falla del equipo"]
-            )
-        with col2:
-            reportador = st.text_input("Nombre del reportador")
-            cargo = st.text_input("Cargo")
-            servicio_tv = st.selectbox(
-                "Servicio",
-                ["UCI", "Urgencias", "Hospitalización", "Consulta externa"]
-            )
-
-        descripcion = st.text_area("Descripción detallada del evento *", height=120)
-        accion = st.text_area("Acción inmediata tomada", height=80)
-        submitted_tv = st.form_submit_button("📋 Guardar reporte")
-
-        if submitted_tv:
-            if equipo_tv and descripcion:
-                st.success("✅ Evento de tecnovigilancia registrado correctamente.")
-                st.info("📧 Se notificará al coordinador biomédico para seguimiento.")
-            else:
-                st.error("Complete los campos obligatorios (*).")
-
-# ---------------------------------------------------
-# MÓDULO: GESTIÓN DE RIESGOS
-# ---------------------------------------------------
-elif "Gestión de riesgos" in modulo:
-    st.header("⚠️ Gestión de riesgos")
-
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.subheader("Evaluación de riesgo")
-        equipo_riesgo = st.text_input("Equipo a evaluar")
-        probabilidad = st.slider("Probabilidad de falla", 1, 5, 3,
-                                  help="1=Muy baja, 5=Muy alta")
-        impacto = st.slider("Impacto clínico", 1, 5, 3,
-                             help="1=Mínimo, 5=Catastrófico")
-        detectabilidad = st.slider("Detectabilidad", 1, 5, 3,
-                                    help="1=Fácil de detectar, 5=Imposible de detectar")
-
-        npr = probabilidad * impacto * detectabilidad
-
-        if npr <= 10:
-            nivel = "🟢 Bajo"
-            color = "success"
-        elif npr <= 30:
-            nivel = "🟡 Medio"
-            color = "warning"
-        else:
-            nivel = "🔴 Alto"
-            color = "error"
-
-        st.markdown("---")
-        st.metric("NPR (Número de Prioridad de Riesgo)", npr)
-        getattr(st, color)(f"Nivel de riesgo: **{nivel}**")
-
-    with col2:
-        st.subheader("Matriz de riesgo")
-        matriz_data = {
-            "": ["Catastrófico (5)", "Serio (4)", "Moderado (3)", "Menor (2)", "Mínimo (1)"],
-            "Muy baja (1)": ["Medio", "Bajo", "Bajo", "Bajo", "Bajo"],
-            "Baja (2)": ["Alto", "Medio", "Bajo", "Bajo", "Bajo"],
-            "Media (3)": ["Alto", "Alto", "Medio", "Bajo", "Bajo"],
-            "Alta (4)": ["Alto", "Alto", "Alto", "Medio", "Bajo"],
-            "Muy alta (5)": ["Alto", "Alto", "Alto", "Alto", "Medio"],
-        }
-        st.dataframe(pd.DataFrame(matriz_data).set_index(""), use_container_width=True)
-
-# ---------------------------------------------------
-# MÓDULO: MANTENIMIENTO
-# ---------------------------------------------------
-elif "Mantenimiento" in modulo:
-    st.header("🔧 Mantenimiento preventivo y correctivo")
-
-    tab1, tab2 = st.tabs(["Programar mantenimiento", "Historial"])
+    topbar("Inventario Biomédico", "Inventario")
+    tab1, tab2 = st.tabs(["➕  Registrar equipo","📋  Listado de equipos"])
 
     with tab1:
-        with st.form("form_mantenimiento", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                equipo_mant = st.text_input("Equipo biomédico *")
-                tipo_mant = st.selectbox(
-                    "Tipo de mantenimiento",
-                    ["Preventivo", "Correctivo", "Calibración", "Verificación"]
-                )
-                fecha_prog = st.date_input("Fecha programada", value=date.today())
-            with col2:
-                tecnico = st.text_input("Técnico responsable")
-                prioridad = st.selectbox("Prioridad", ["Alta", "Media", "Baja"])
-                costo_est = st.number_input("Costo estimado (COP)", min_value=0, step=10000)
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        with st.form("form_inv", clear_on_submit=True):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                nombre   = st.text_input("Nombre del equipo *")
+                marca    = st.text_input("Marca *")
+                modelo   = st.text_input("Modelo")
+            with c2:
+                serie    = st.text_input("N° de serie")
+                servicio = st.selectbox("Servicio *",
+                    ["UCI","Urgencias","Hospitalización","Consulta externa","Imágenes diagnósticas"])
+                clase    = st.selectbox("Clase de riesgo INVIMA",
+                    ["Clase I","Clase IIa","Clase IIb","Clase III"])
+            with c3:
+                fecha_adq = st.date_input("Fecha adquisición", value=date.today())
+                vida_util = st.number_input("Vida útil (años)", 1, 30, 5)
+                costo     = st.number_input("Costo (COP)", min_value=0, step=100000)
+            obs = st.text_area("Observaciones")
+            if st.form_submit_button("✅ Registrar equipo"):
+                if nombre and marca:
+                    st.success(f"✅ **{nombre}** ({marca}) registrado en **{servicio}**.")
+                else:
+                    st.error("Complete los campos obligatorios (*).")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-            actividades = st.text_area("Actividades a realizar", height=100)
-            submitted_mant = st.form_submit_button("📅 Programar mantenimiento")
+    with tab2:
+        st.markdown('<div class="card"><div class="card-title">Equipos registrados</div>', unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame({
+            "Equipo":   ["Ventilador Mecánico","Monitor Multiparámetro","Desfibrilador",
+                         "Bomba de Infusión","Ecógrafo","Electrobisturí"],
+            "Marca":    ["Dräger","Mindray","Zoll","Fresenius","GE","Covidien"],
+            "Servicio": ["UCI","Urgencias","UCI","Hospitalización","Imágenes","Cirugía"],
+            "Clase":    ["Clase III","Clase IIb","Clase III","Clase IIa","Clase IIb","Clase III"],
+            "Estado":   ["✅ Operativo","✅ Operativo","🔧 Mantenimiento",
+                         "✅ Operativo","✅ Operativo","⚠️ Alerta"],
+        }), use_container_width=True, hide_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-            if submitted_mant:
-                if equipo_mant:
+# ══════════════════════════════════════════
+# TECNOVIGILANCIA
+# ══════════════════════════════════════════
+elif "Tecnovigilancia" in modulo:
+    topbar("Tecnovigilancia", "Tecnovigilancia")
+    cf, cs = st.columns([1.6, 1])
+
+    with cf:
+        st.markdown('<div class="card"><div class="card-title">Registro de evento adverso</div>', unsafe_allow_html=True)
+        with st.form("form_tv", clear_on_submit=True):
+            c1, c2 = st.columns(2)
+            with c1:
+                equipo_tv   = st.text_input("Equipo involucrado *")
+                tipo_ev     = st.selectbox("Tipo de evento",
+                    ["Incidente","Casi incidente","Evento adverso serio","Falla del equipo","Alerta de seguridad"])
+                fecha_ev    = st.date_input("Fecha del evento", value=date.today())
+            with c2:
+                reportador  = st.text_input("Reportador")
+                cargo       = st.text_input("Cargo")
+                servicio_tv = st.selectbox("Servicio",
+                    ["UCI","Urgencias","Hospitalización","Consulta externa"])
+            descripcion = st.text_area("Descripción detallada *", height=100)
+            accion      = st.text_area("Acción inmediata tomada", height=60)
+            if st.form_submit_button("📋 Guardar reporte"):
+                if equipo_tv and descripcion:
+                    st.success("✅ Evento registrado. Se notificará al coordinador biomédico.")
+                else:
+                    st.error("Complete los campos obligatorios (*).")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with cs:
+        st.markdown('<div class="card"><div class="card-title">Eventos por tipo (30 días)</div>', unsafe_allow_html=True)
+        fig_tv = go.Figure(go.Bar(
+            x=["Incidente","Casi inc.","Adverso","Falla","Alerta"],
+            y=[3,5,1,4,2],
+            marker_color=["#1a8fd1","#e67e22","#e74c3c","#9b59b6","#27ae60"]
+        ))
+        lay_tv = base_layout(190)
+        lay_tv.update(xaxis=dict(showgrid=False, tickfont_size=9),
+                      yaxis=dict(gridcolor="#f0f4f9"))
+        fig_tv.update_layout(lay_tv)
+        st.plotly_chart(fig_tv, use_container_width=True, config=PLOT_CFG)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-title">Últimos reportes</div>', unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame({
+            "Equipo": ["Ventilador","Monitor","Bomba"],
+            "Tipo":   ["Falla","Incidente","Casi inc."],
+            "Fecha":  ["14/05","10/05","08/05"],
+        }), use_container_width=True, hide_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ══════════════════════════════════════════
+# GESTIÓN DE RIESGOS
+# ══════════════════════════════════════════
+elif "Riesgos" in modulo:
+    topbar("Gestión de Riesgos", "Gestión de Riesgos")
+    ce, cc = st.columns([1, 1.4])
+
+    with ce:
+        st.markdown('<div class="card"><div class="card-title">Evaluación de riesgo (AMEF)</div>', unsafe_allow_html=True)
+        st.text_input("Equipo a evaluar")
+        prob = st.slider("Probabilidad de falla", 1, 5, 3, help="1=Muy baja · 5=Muy alta")
+        imp  = st.slider("Impacto clínico",       1, 5, 3, help="1=Mínimo · 5=Catastrófico")
+        det  = st.slider("Detectabilidad",        1, 5, 3, help="1=Fácil · 5=Imposible")
+        npr  = prob * imp * det
+        col_npr  = "#27ae60" if npr <= 20 else ("#e67e22" if npr <= 60 else "#e74c3c")
+        nivel_npr = "🟢 Bajo"  if npr <= 20 else ("🟡 Medio" if npr <= 60 else "🔴 Alto")
+        st.markdown(f"""
+        <div style="background:{col_npr}18;border:1.5px solid {col_npr};
+             border-radius:10px;padding:1rem;text-align:center;margin-top:.8rem;">
+            <div style="font-size:.76rem;color:#666;margin-bottom:4px;">
+                NPR — Número de Prioridad de Riesgo
+            </div>
+            <div style="font-size:2.3rem;font-weight:700;color:{col_npr};">{npr}</div>
+            <div style="font-size:1rem;font-weight:600;color:{col_npr};">{nivel_npr}</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with cc:
+        st.markdown('<div class="card"><div class="card-title">Distribución de riesgo por servicio</div>', unsafe_allow_html=True)
+        srvs = ["UCI","Urgencias","Hospitalización","Consulta ext."]
+        fig_r = go.Figure()
+        fig_r.add_bar(name="🔴 Alto",  x=srvs, y=[7,6,3,2],   marker_color="#e74c3c")
+        fig_r.add_bar(name="🟡 Medio", x=srvs, y=[18,15,22,10], marker_color="#e67e22")
+        fig_r.add_bar(name="🟢 Bajo",  x=srvs, y=[43,31,64,24], marker_color="#27ae60")
+        lay_r = base_layout(270)
+        lay_r.update(barmode="stack",
+                     legend=dict(orientation="h", y=1.05, x=1, xanchor="right", font_size=10),
+                     xaxis=dict(showgrid=False, tickfont_size=11),
+                     yaxis=dict(gridcolor="#f0f4f9"))
+        fig_r.update_layout(lay_r)
+        st.plotly_chart(fig_r, use_container_width=True, config=PLOT_CFG)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="card"><div class="card-title">Equipos con riesgo alto — Seguimiento</div>', unsafe_allow_html=True)
+    st.dataframe(pd.DataFrame({
+        "Equipo":          ["Ventilador UCI-01","Desfibrilador Urg-03","Ventilador UCI-04","Monitor UCI-02","Bomba Inf-07"],
+        "Servicio":        ["UCI","Urgencias","UCI","UCI","Hospitalización"],
+        "NPR":             [75,60,80,50,45],
+        "Último control":  ["10/04/2025","15/04/2025","02/05/2025","08/05/2025","12/05/2025"],
+        "Acción requerida":["Revisión programada","Calibración urgente","Cambio de pieza","Monitoreo","Verificación"],
+    }), use_container_width=True, hide_index=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ══════════════════════════════════════════
+# MANTENIMIENTO
+# ══════════════════════════════════════════
+elif "Mantenimiento" in modulo:
+    topbar("Mantenimiento Biomédico", "Mantenimiento")
+    tab1, tab2, tab3 = st.tabs(["📅  Programar","📊  Indicadores","📋  Historial"])
+
+    with tab1:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        with st.form("form_mant", clear_on_submit=True):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                eq_m    = st.text_input("Equipo biomédico *")
+                tipo_m  = st.selectbox("Tipo",
+                    ["Preventivo","Correctivo","Calibración","Verificación metrológica"])
+                fecha_m = st.date_input("Fecha programada", value=date.today())
+            with c2:
+                tecnico_m   = st.text_input("Técnico responsable")
+                prioridad_m = st.selectbox("Prioridad", ["🔴 Alta","🟡 Media","🟢 Baja"])
+                costo_m     = st.number_input("Costo estimado (COP)", min_value=0, step=10000)
+            with c3:
+                servicio_m = st.selectbox("Servicio",
+                    ["UCI","Urgencias","Hospitalización","Consulta externa"])
+                duracion_m = st.number_input("Duración estimada (h)",
+                    min_value=0.5, max_value=48.0, step=0.5, value=2.0)
+                repuestos  = st.text_input("Repuestos requeridos")
+            actividades_m = st.text_area("Actividades a realizar", height=80)
+            if st.form_submit_button("📅 Programar mantenimiento"):
+                if eq_m:
                     st.success(
-                        f"✅ Mantenimiento **{tipo_mant}** programado para **{equipo_mant}** "
-                        f"el {fecha_prog.strftime('%d/%m/%Y')}."
+                        f"✅ **{tipo_m}** programado para **{eq_m}** "
+                        f"el {fecha_m.strftime('%d/%m/%Y')} — Prioridad: {prioridad_m}"
                     )
                 else:
                     st.error("Ingrese el nombre del equipo.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab2:
-        st.subheader("Historial de mantenimientos")
-        historial = {
-            "Equipo": ["Ventilador Mecánico", "Monitor Multiparámetro", "Desfibrilador"],
-            "Tipo": ["Preventivo", "Correctivo", "Calibración"],
-            "Fecha": ["10/04/2025", "22/03/2025", "15/02/2025"],
-            "Técnico": ["Juan García", "María López", "Carlos Ruiz"],
-            "Estado": ["✅ Completado", "✅ Completado", "✅ Completado"],
-        }
-        st.dataframe(pd.DataFrame(historial), use_container_width=True)
+        ci1, ci2, ci3 = st.columns(3)
+
+        with ci1:
+            st.markdown('<div class="card"><div class="card-title">Cumplimiento preventivo</div>', unsafe_allow_html=True)
+            fig_g = go.Figure(go.Indicator(
+                mode="gauge+number", value=87,
+                number={"suffix":"%","font":{"size":30}},
+                gauge=dict(
+                    axis=dict(range=[0,100]),
+                    bar=dict(color="#1a8fd1"),
+                    steps=[
+                        dict(range=[0,60],   color="#fde8e8"),
+                        dict(range=[60,80],  color="#fef9e7"),
+                        dict(range=[80,100], color="#eafaf1"),
+                    ]
+                )
+            ))
+            fig_g.update_layout(height=195, margin=dict(l=10,r=10,t=10,b=10),
+                                paper_bgcolor="white")
+            st.plotly_chart(fig_g, use_container_width=True, config=PLOT_CFG)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with ci2:
+            st.markdown('<div class="card"><div class="card-title">MTBF por servicio (días)</div>', unsafe_allow_html=True)
+            fig_mtbf = go.Figure(go.Bar(
+                x=["UCI","Urgencias","Hosp.","Consulta"], y=[180,120,210,260],
+                marker_color="#0D2B52", text=[180,120,210,260], textposition="outside"
+            ))
+            lay_m = base_layout(195)
+            lay_m.update(xaxis=dict(showgrid=False, tickfont_size=10),
+                         yaxis=dict(gridcolor="#f0f4f9", visible=False))
+            fig_mtbf.update_layout(lay_m)
+            st.plotly_chart(fig_mtbf, use_container_width=True, config=PLOT_CFG)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with ci3:
+            st.markdown('<div class="card"><div class="card-title">Distribución por tipo</div>', unsafe_allow_html=True)
+            fig_tipo = go.Figure(go.Pie(
+                labels=["Preventivo","Correctivo","Calibración","Verificación"],
+                values=[55,25,12,8], hole=0.48,
+                marker_colors=["#1a8fd1","#e74c3c","#27ae60","#e67e22"]
+            ))
+            fig_tipo.update_layout(height=195, margin=dict(l=0,r=0,t=4,b=0),
+                                   paper_bgcolor="white", showlegend=True,
+                                   legend=dict(orientation="h", y=-0.3, font_size=9))
+            st.plotly_chart(fig_tipo, use_container_width=True, config=PLOT_CFG)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    with tab3:
+        st.markdown('<div class="card"><div class="card-title">Historial de mantenimientos</div>', unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame({
+            "Equipo":    ["Ventilador Mecánico","Monitor Multiparámetro","Desfibrilador",
+                          "Bomba de Infusión","Ecógrafo"],
+            "Tipo":      ["Preventivo","Correctivo","Calibración","Preventivo","Verificación"],
+            "Fecha":     ["10/04/2025","22/03/2025","15/02/2025","05/04/2025","28/03/2025"],
+            "Técnico":   ["J. García","M. López","C. Ruiz","J. García","A. Torres"],
+            "Costo COP": ["$320.000","$850.000","$120.000","$280.000","$95.000"],
+            "Estado":    ["✅ Completado","✅ Completado","✅ Completado",
+                          "✅ Completado","✅ Completado"],
+        }), use_container_width=True, hide_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
