@@ -102,6 +102,16 @@ elif modulo == "Inventario":
 
     marca = st.text_input("Marca")
 
+    servicio = st.selectbox(
+        "Servicio",
+        [
+            "UCI",
+            "Urgencias",
+            "Hospitalización",
+            "Consulta externa"
+        ]
+    )
+
     if st.button("Registrar equipo"):
         st.success(f"{nombre} registrado correctamente")
 
