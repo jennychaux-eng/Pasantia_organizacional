@@ -131,6 +131,29 @@ section[data-testid="stSidebar"] hr {
 #MainMenu { visibility: hidden; }
 footer    { visibility: hidden; }
 header    { visibility: hidden; }
+
+/* ── FIX: botón para reabrir el sidebar siempre visible ── */
+[data-testid="collapsedControl"] {
+    display:          flex        !important;
+    visibility:       visible     !important;
+    opacity:          1           !important;
+    background:       #0D2B52     !important;
+    border-radius:    0 10px 10px 0 !important;
+    padding:          14px 7px    !important;
+    position:         fixed       !important;
+    left:             0           !important;
+    top:              48%         !important;
+    z-index:          999999      !important;
+    box-shadow:       3px 0 10px rgba(0,0,0,0.25) !important;
+    transition:       background .2s !important;
+}
+[data-testid="collapsedControl"]:hover {
+    background: #1a8fd1 !important;
+}
+[data-testid="collapsedControl"] svg {
+    fill:  white !important;
+    color: white !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
