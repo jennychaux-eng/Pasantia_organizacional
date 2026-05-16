@@ -22,137 +22,167 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-:root {
-    --navy:   #0D2B52;
-    --blue:   #1a8fd1;
-    --blue2:  #2eaff5;
-    --light:  #F0F4F9;
-    --gray:   #8a9bb5;
-    --green:  #27ae60;
-    --orange: #e67e22;
-    --red:    #e74c3c;
-    --shadow: 0 2px 12px rgba(13,43,82,0.09);
-}
 * { font-family: 'DM Sans', sans-serif !important; }
 
-/* Fondo */
+/* Fondo principal */
 .main .block-container {
-    background-color: var(--light);
+    background-color: #F0F4F9;
     padding-top: 1.2rem !important;
     max-width: 100% !important;
 }
 
-/* Sidebar */
+/* ── SIDEBAR NATIVO ── */
 section[data-testid="stSidebar"] {
     background: linear-gradient(175deg, #0D2B52 0%, #0a1e3d 100%) !important;
 }
-section[data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
-section[data-testid="stSidebar"] * { color: rgba(255,255,255,0.85) !important; }
+section[data-testid="stSidebar"] * {
+    color: rgba(255,255,255,0.88) !important;
+}
 section[data-testid="stSidebar"] .stSelectbox > div > div {
     background: rgba(255,255,255,0.08) !important;
-    border: 1px solid rgba(255,255,255,0.14) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
     border-radius: 8px !important;
+    color: white !important;
 }
 section[data-testid="stSidebar"] label {
-    font-size: 0.7rem !important;
+    font-size: 0.72rem !important;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: rgba(255,255,255,0.45) !important;
 }
 section[data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.1) !important;
-    margin: 0.5rem 0 !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    margin: 0.6rem 0 !important;
 }
-
-.logo-wrap {
-    background: rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding: 1rem;
-    text-align: center;
+section[data-testid="stSidebar"] h2, 
+section[data-testid="stSidebar"] h3 {
+    color: white !important;
+    font-size: 0.95rem !important;
+    margin: 0.3rem 0 !important;
 }
 
 /* Topbar */
 .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    background: white; border-radius: 10px;
-    padding: 0.6rem 1.2rem; margin-bottom: 1rem;
-    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 10px;
+    padding: 0.65rem 1.2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 12px rgba(13,43,82,0.09);
 }
-.topbar-title  { font-size: 1.05rem; font-weight: 700; color: var(--navy); }
-.topbar-crumb  { font-size: 0.72rem; color: var(--gray); margin-top: 1px; }
-.topbar-user   { font-size: 0.83rem; font-weight: 600; color: var(--navy); }
+.topbar-title { font-size: 1.05rem; font-weight: 700; color: #0D2B52; }
+.topbar-crumb { font-size: 0.72rem; color: #8a9bb5; margin-top: 1px; }
+.topbar-user  { font-size: 0.83rem; font-weight: 600; color: #0D2B52; }
 
-/* KPI grid */
+/* KPI Cards */
 .kpi-grid {
-    display: grid; grid-template-columns: repeat(4,1fr);
-    gap: 14px; margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 1rem;
 }
 .kpi-card {
-    background: white; border-radius: 12px;
-    padding: 1rem 1.1rem; box-shadow: var(--shadow);
-    display: flex; align-items: center; gap: 0.9rem;
-    border-top: 3px solid var(--blue); transition: transform .15s;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 2px 12px rgba(13,43,82,0.09);
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    border-top: 3px solid #1a8fd1;
+    transition: transform .15s;
 }
 .kpi-card:hover { transform: translateY(-2px); }
 .kpi-icon {
-    font-size: 1.7rem; background: rgba(26,143,209,0.1);
-    border-radius: 10px; width: 50px; height: 50px;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    font-size: 1.7rem;
+    background: rgba(26,143,209,0.1);
+    border-radius: 10px;
+    width: 50px; height: 50px;
+    display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
 }
-.kpi-val   { font-size: 1.55rem; font-weight: 700; color: var(--navy); line-height: 1; }
-.kpi-label { font-size: 0.75rem; color: var(--gray); margin-top: 3px; }
+.kpi-val   { font-size: 1.55rem; font-weight: 700; color: #0D2B52; line-height: 1; }
+.kpi-label { font-size: 0.75rem; color: #8a9bb5; margin-top: 3px; }
 .kpi-delta { font-size: 0.7rem; margin-top: 3px; }
-.up   { color: var(--green); }
-.down { color: var(--red); }
+.up   { color: #27ae60; }
+.down { color: #e74c3c; }
 
-/* Cards */
+/* Cards de contenido */
 .card {
-    background: white; border-radius: 12px;
-    padding: 1rem 1.1rem 0.6rem; box-shadow: var(--shadow);
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.1rem 0.6rem;
+    box-shadow: 0 2px 12px rgba(13,43,82,0.09);
 }
 .card-title {
-    font-size: 0.88rem; font-weight: 700; color: var(--navy);
-    border-bottom: 1px solid #eef2f7; padding-bottom: 0.4rem; margin-bottom: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0D2B52;
+    border-bottom: 1px solid #eef2f7;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
 }
 
 /* Botones */
 .stButton > button {
-    background: linear-gradient(135deg, var(--navy), var(--blue)) !important;
-    color: white !important; border: none !important;
-    border-radius: 8px !important; font-weight: 600 !important;
+    background: linear-gradient(135deg, #0D2B52, #1a8fd1) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: opacity .2s !important;
 }
 .stButton > button:hover { opacity: 0.85 !important; }
 
 /* Inputs */
 .stTextInput input, .stTextArea textarea {
-    border-radius: 8px !important; border: 1px solid #dce5f0 !important;
+    border-radius: 8px !important;
+    border: 1px solid #dce5f0 !important;
+}
+
+/* NPR badge */
+.npr-box {
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    margin-top: 0.8rem;
 }
 
 #MainMenu { visibility: hidden; }
 footer    { visibility: hidden; }
-header    { visibility: hidden; }
 
-/* ── FIX: botón para reabrir el sidebar siempre visible ── */
+/* ── Botón reapertura sidebar: ocultar texto y mostrar ☰ ── */
 [data-testid="collapsedControl"] {
-    display:          flex        !important;
-    visibility:       visible     !important;
-    opacity:          1           !important;
-    background:       #0D2B52     !important;
-    border-radius:    0 10px 10px 0 !important;
-    padding:          14px 7px    !important;
-    position:         fixed       !important;
-    left:             0           !important;
-    top:              48%         !important;
-    z-index:          999999      !important;
-    box-shadow:       3px 0 10px rgba(0,0,0,0.25) !important;
-    transition:       background .2s !important;
+    background: #0D2B52 !important;
+    border-radius: 0 10px 10px 0 !important;
+    padding: 14px 10px !important;
+    box-shadow: 3px 0 12px rgba(0,0,0,0.25) !important;
+    overflow: hidden !important;
+    width: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 [data-testid="collapsedControl"]:hover {
     background: #1a8fd1 !important;
 }
-[data-testid="collapsedControl"] svg {
-    fill:  white !important;
-    color: white !important;
+/* Ocultar el ícono/texto original */
+[data-testid="collapsedControl"] svg,
+[data-testid="collapsedControl"] span {
+    display: none !important;
+}
+/* Insertar ☰ con CSS puro */
+[data-testid="collapsedControl"]::after {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: white;
+    border-radius: 2px;
+    box-shadow: 0 7px 0 white, 0 14px 0 white;
+    margin: 0 auto;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -164,47 +194,56 @@ BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo_sportmeds.png")
 
 # ─────────────────────────────────────────
-# SIDEBAR
+# SIDEBAR — nativo st.sidebar (siempre funciona)
 # ─────────────────────────────────────────
-with st.sidebar:
-    st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
-    if os.path.exists(LOGO_PATH):
-        st.image(LOGO_PATH, use_container_width=True)
-    else:
-        st.markdown("<span style='font-size:1.1rem;font-weight:700;color:white;'>⚕️ SPORTMEDS</span>",
-                    unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    modulo = st.selectbox(
-        "NAVEGACIÓN",
-        ["🏠  Panel de Control",
-         "📦  Inventario",
-         "🔍  Tecnovigilancia",
-         "⚠️  Gestión de Riesgos",
-         "🔧  Mantenimiento"],
-        label_visibility="visible"
-    )
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style='padding:0.3rem 0.8rem;'>
-        <div style='font-size:0.67rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.08em;'>Usuario</div>
-        <div style='font-size:0.87rem;font-weight:600;margin-top:3px;'>Ing. Biomédico</div>
-        <div style='font-size:0.7rem;color:rgba(255,255,255,0.4);'>Administrador</div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown(
-        "<div style='font-size:0.65rem;color:rgba(255,255,255,0.25);text-align:center;padding-bottom:.5rem;'>"
-        "Gestión Biomédica v1.0 · © 2025 SPORTMEDS</div>",
+# Logo
+if os.path.exists(LOGO_PATH):
+    st.sidebar.image(LOGO_PATH, width=190)
+else:
+    st.sidebar.markdown(
+        "<div style='font-size:1.15rem;font-weight:700;padding:0.5rem 0;'>⚕️ SPORTMEDS</div>",
         unsafe_allow_html=True
     )
 
+st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+st.sidebar.markdown("### Menú Principal")
+
+modulo = st.sidebar.selectbox(
+    "Seleccione un módulo",
+    [
+        "🏠  Panel de Control",
+        "📦  Inventario",
+        "🔍  Tecnovigilancia",
+        "⚠️  Gestión de Riesgos",
+        "🔧  Mantenimiento",
+    ]
+)
+
+st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div style='padding: 0.2rem 0;'>
+    <div style='font-size:0.67rem;color:rgba(255,255,255,0.38);
+                text-transform:uppercase;letter-spacing:.08em;'>Usuario</div>
+    <div style='font-size:0.9rem;font-weight:600;margin-top:3px;'>Ing. Biomédico</div>
+    <div style='font-size:0.7rem;color:rgba(255,255,255,0.42);'>Administrador</div>
+</div>
+""", unsafe_allow_html=True)
+st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+st.sidebar.markdown(
+    "<div style='font-size:0.65rem;color:rgba(255,255,255,0.25);text-align:center;'>"
+    "Gestión Biomédica v1.0<br>© 2025 SPORTMEDS Centro Médico</div>",
+    unsafe_allow_html=True
+)
+
 # ─────────────────────────────────────────
-# HELPER: topbar
+# HELPERS
 # ─────────────────────────────────────────
+PLOT_CFG = {"displayModeBar": False}
+
+def base_layout(h=220):
+    return dict(height=h, margin=dict(l=0, r=0, t=4, b=0),
+                plot_bgcolor="white", paper_bgcolor="white")
+
 def topbar(titulo, ruta):
     st.markdown(f"""
     <div class="topbar">
@@ -216,17 +255,8 @@ def topbar(titulo, ruta):
     </div>
     """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────
-# HELPER: plotly config
-# ─────────────────────────────────────────
-PLOT_CFG = {"displayModeBar": False}
-
-def base_layout(h=220):
-    return dict(height=h, margin=dict(l=0, r=0, t=4, b=0),
-                plot_bgcolor="white", paper_bgcolor="white")
-
 # ══════════════════════════════════════════
-# PANEL DE CONTROL
+# MÓDULO: PANEL DE CONTROL
 # ══════════════════════════════════════════
 if "Panel" in modulo:
     topbar("Panel de Control", "Panel de Control")
@@ -269,7 +299,7 @@ if "Panel" in modulo:
     </div>
     """, unsafe_allow_html=True)
 
-    # — Fila 1: 3 gráficas
+    # Fila 1: 3 gráficas
     c1, c2, c3 = st.columns([1.4, 1.1, 1.4])
 
     with c1:
@@ -319,7 +349,7 @@ if "Panel" in modulo:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # — Fila 2: línea + tabla
+    # Fila 2: línea + tabla
     c4, c5 = st.columns([1.6, 1])
 
     with c4:
@@ -343,18 +373,18 @@ if "Panel" in modulo:
     with c5:
         st.markdown('<div class="card"><div class="card-title">Próximos mantenimientos</div>', unsafe_allow_html=True)
         st.dataframe(pd.DataFrame({
-            "Equipo": ["Ventilador UCI-03","Monitor Urg-07","Desfibrilador","Bomba Inf-12","Rayos X Dig."],
+            "Equipo": ["Ventilador UCI-03","Monitor Urg-07","Desfibrilador","Bomba Inf-12","Rayos X"],
             "Fecha":  ["17/05","19/05","22/05","28/05","30/05"],
             "Estado": ["🔴 Urgente","🔴 Urgente","🟡 Próximo","🟡 Próximo","🟢 Programado"],
         }), use_container_width=True, hide_index=True, height=210)
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
-# INVENTARIO
+# MÓDULO: INVENTARIO
 # ══════════════════════════════════════════
 elif "Inventario" in modulo:
     topbar("Inventario Biomédico", "Inventario")
-    tab1, tab2 = st.tabs(["➕  Registrar equipo","📋  Listado de equipos"])
+    tab1, tab2 = st.tabs(["➕  Registrar equipo", "📋  Listado de equipos"])
 
     with tab1:
         st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -396,7 +426,7 @@ elif "Inventario" in modulo:
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
-# TECNOVIGILANCIA
+# MÓDULO: TECNOVIGILANCIA
 # ══════════════════════════════════════════
 elif "Tecnovigilancia" in modulo:
     topbar("Tecnovigilancia", "Tecnovigilancia")
@@ -409,7 +439,8 @@ elif "Tecnovigilancia" in modulo:
             with c1:
                 equipo_tv   = st.text_input("Equipo involucrado *")
                 tipo_ev     = st.selectbox("Tipo de evento",
-                    ["Incidente","Casi incidente","Evento adverso serio","Falla del equipo","Alerta de seguridad"])
+                    ["Incidente","Casi incidente","Evento adverso serio",
+                     "Falla del equipo","Alerta de seguridad"])
                 fecha_ev    = st.date_input("Fecha del evento", value=date.today())
             with c2:
                 reportador  = st.text_input("Reportador")
@@ -449,7 +480,7 @@ elif "Tecnovigilancia" in modulo:
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
-# GESTIÓN DE RIESGOS
+# MÓDULO: GESTIÓN DE RIESGOS
 # ══════════════════════════════════════════
 elif "Riesgos" in modulo:
     topbar("Gestión de Riesgos", "Gestión de Riesgos")
@@ -462,11 +493,10 @@ elif "Riesgos" in modulo:
         imp  = st.slider("Impacto clínico",       1, 5, 3, help="1=Mínimo · 5=Catastrófico")
         det  = st.slider("Detectabilidad",        1, 5, 3, help="1=Fácil · 5=Imposible")
         npr  = prob * imp * det
-        col_npr  = "#27ae60" if npr <= 20 else ("#e67e22" if npr <= 60 else "#e74c3c")
+        col_npr   = "#27ae60" if npr <= 20 else ("#e67e22" if npr <= 60 else "#e74c3c")
         nivel_npr = "🟢 Bajo"  if npr <= 20 else ("🟡 Medio" if npr <= 60 else "🔴 Alto")
         st.markdown(f"""
-        <div style="background:{col_npr}18;border:1.5px solid {col_npr};
-             border-radius:10px;padding:1rem;text-align:center;margin-top:.8rem;">
+        <div class="npr-box" style="background:{col_npr}18; border:1.5px solid {col_npr};">
             <div style="font-size:.76rem;color:#666;margin-bottom:4px;">
                 NPR — Número de Prioridad de Riesgo
             </div>
@@ -480,7 +510,7 @@ elif "Riesgos" in modulo:
         st.markdown('<div class="card"><div class="card-title">Distribución de riesgo por servicio</div>', unsafe_allow_html=True)
         srvs = ["UCI","Urgencias","Hospitalización","Consulta ext."]
         fig_r = go.Figure()
-        fig_r.add_bar(name="🔴 Alto",  x=srvs, y=[7,6,3,2],   marker_color="#e74c3c")
+        fig_r.add_bar(name="🔴 Alto",  x=srvs, y=[7,6,3,2],    marker_color="#e74c3c")
         fig_r.add_bar(name="🟡 Medio", x=srvs, y=[18,15,22,10], marker_color="#e67e22")
         fig_r.add_bar(name="🟢 Bajo",  x=srvs, y=[43,31,64,24], marker_color="#27ae60")
         lay_r = base_layout(270)
@@ -495,20 +525,22 @@ elif "Riesgos" in modulo:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="card"><div class="card-title">Equipos con riesgo alto — Seguimiento</div>', unsafe_allow_html=True)
     st.dataframe(pd.DataFrame({
-        "Equipo":          ["Ventilador UCI-01","Desfibrilador Urg-03","Ventilador UCI-04","Monitor UCI-02","Bomba Inf-07"],
+        "Equipo":          ["Ventilador UCI-01","Desfibrilador Urg-03","Ventilador UCI-04",
+                            "Monitor UCI-02","Bomba Inf-07"],
         "Servicio":        ["UCI","Urgencias","UCI","UCI","Hospitalización"],
-        "NPR":             [75,60,80,50,45],
+        "NPR":             [75, 60, 80, 50, 45],
         "Último control":  ["10/04/2025","15/04/2025","02/05/2025","08/05/2025","12/05/2025"],
-        "Acción requerida":["Revisión programada","Calibración urgente","Cambio de pieza","Monitoreo","Verificación"],
+        "Acción requerida":["Revisión programada","Calibración urgente","Cambio de pieza",
+                            "Monitoreo","Verificación"],
     }), use_container_width=True, hide_index=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
-# MANTENIMIENTO
+# MÓDULO: MANTENIMIENTO
 # ══════════════════════════════════════════
 elif "Mantenimiento" in modulo:
     topbar("Mantenimiento Biomédico", "Mantenimiento")
-    tab1, tab2, tab3 = st.tabs(["📅  Programar","📊  Indicadores","📋  Historial"])
+    tab1, tab2, tab3 = st.tabs(["📅  Programar", "📊  Indicadores", "📋  Historial"])
 
     with tab1:
         st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -566,8 +598,10 @@ elif "Mantenimiento" in modulo:
         with ci2:
             st.markdown('<div class="card"><div class="card-title">MTBF por servicio (días)</div>', unsafe_allow_html=True)
             fig_mtbf = go.Figure(go.Bar(
-                x=["UCI","Urgencias","Hosp.","Consulta"], y=[180,120,210,260],
-                marker_color="#0D2B52", text=[180,120,210,260], textposition="outside"
+                x=["UCI","Urgencias","Hosp.","Consulta"],
+                y=[180,120,210,260],
+                marker_color="#0D2B52",
+                text=[180,120,210,260], textposition="outside"
             ))
             lay_m = base_layout(195)
             lay_m.update(xaxis=dict(showgrid=False, tickfont_size=10),
